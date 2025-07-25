@@ -1,0 +1,226 @@
+<div class="ticket-form-container fade-in">
+  <div class="form-header">
+    <h1 class="form-title">
+      <i class="fas fa-plus me-2" *ngIf="!isEditMode"></i>
+      <i class="fas fa-edit me-2" *ngIf="isEditMode"></i>
+      {{ isEditMode ? 'Edit Task' : 'Create New Task' }}
+    </h1>
+    <p class="text-muted">
+      {{ isEditMode ? 'Update the task details below' : 'Fill in the details to create a new task' }}
+    </p>
+  </div>
+
+  <div *ngIf="loading" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="mt-2 text-muted">Loading task details...</p>
+  </div>
+
+  <div *ngIf="!loading" class="form-container">
+    <form [formGroup]="ticketForm" (ngSubmit)="onSubmit()" class="ticket-form">
+      <div class="row">
+        <!-- Title -->
+        <div class="col-12 mb-3">
+          <label for="title" class="form-label required">
+            <i class="fas fa-heading me-2"></i>
+            Task Title
+          </label>
+          <input 
+            type="text" 
+            class="form-control" 
+            id="title" 
+            formControlName="title"
+            [class.is-invalid]="isFieldInvalid('title')"
+            placeholder="What needs to be done?"
+            maxlength="200">
+          <div class="invalid-feedback">
+            {{ getFieldError('title') }}
+          </div>
+          <div class="form-text">
+            {{ ticketForm.get('title')?.value?.length || 0 }}/200 characters
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div class="col-12 mb-3">
+          <label for="description" class="form-label">
+            <i class="fas fa-align-left me-2"></i>
+            Description
+          </label>
+          <textarea 
+            class="form-control" 
+            id="description" 
+            formControlName="description"
+            [class.is-invalid]="isFieldInvalid('description')"
+            placeholder="Provide more details about the task..."
+            rows="4"
+            maxlength="1000"></textarea>
+          <div class="invalid-feedback">
+            {{ getFieldError('description') }}
+          </div>
+          <div class="form-text">
+            {{ ticketForm.get('description')?.value?.length || 0 }}/1000 characters
+          </div>
+        </div>
+
+        <!-- Assignee -->
+        <div class="col-md-6 mb-3">
+          <label for="assigneeId" class="form-label required">
+            <i class="fas fa-user me-2"></i>
+            Assign To
+          </label>
+          <select 
+            class="form-select" 
+            id="assigneeId" 
+            formControlName="assigneeId"
+            [class.is-invalid]="isFieldInvalid('assigneeId')">
+            <option value="">Select a family member</option>
+            <option *ngFor="let member of familyMembers" [value]="member.id">
+              {{ member.avatar }} {{ member.firstName }} {{ member.lastName }}
+            </option>
+          </select>
+          <div class="invalid-feedback">
+            {{ getFieldError('assigneeId') }}
+          </div>
+        </div>
+
+        <!-- Due Date -->
+        <div class="col-md-6 mb-3">
+          <label for="dueDate" class="form-label">
+            <i class="fas fa-calendar me-2"></i>
+            Due Date
+          </label>
+          <input 
+            type="date" 
+            class="form-control" 
+            id="dueDate" 
+            formControlName="dueDate"
+            [min]="getDateToday()">
+          <div class="form-text">
+            Optional - leave blank if no specific due date
+          </div>
+        </div>
+
+        <!-- Priority -->
+        <div class="col-md-6 mb-3">
+          <label for="priority" class="form-label required">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            Priority
+          </label>
+          <select 
+            class="form-select" 
+            id="priority" 
+            formControlName="priority"
+            [class.is-invalid]="isFieldInvalid('priority')">
+            <option *ngFor="let priority of priorities" [value]="priority">
+              {{ priority }}
+            </option>
+          </select>
+          <div class="invalid-feedback">
+            {{ getFieldError('priority') }}
+          </div>
+        </div>
+
+        <!-- Category -->
+        <div class="col-md-6 mb-3">
+          <label for="category" class="form-label required">
+            <i class="fas fa-tag me-2"></i>
+            Category
+          </label>
+          <select 
+            class="form-select" 
+            id="category" 
+            formControlName="category"
+            [class.is-invalid]="isFieldInvalid('category')">
+            <option *ngFor="let category of categories" [value]="category">
+              {{ category }}
+            </option>
+          </select>
+          <div class="invalid-feedback">
+            {{ getFieldError('category') }}
+          </div>
+        </div>
+
+        <!-- Photo URL -->
+        <div class="col-12 mb-3">
+          <label for="photoUrl" class="form-label">
+            <i class="fas fa-image me-2"></i>
+            Photo URL
+          </label>
+          <input 
+            type="url" 
+            class="form-control" 
+            id="photoUrl" 
+            formControlName="photoUrl"
+            [class.is-invalid]="isFieldInvalid('photoUrl')"
+            placeholder="https://example.com/photo.jpg">
+          <div class="invalid-feedback">
+            {{ getFieldError('photoUrl') }}
+          </div>
+          <div class="form-text">
+            Optional - Add a photo URL to help clarify the task
+          </div>
+        </div>
+      </div>
+
+      <!-- Preview Section -->
+      <div class="preview-section" *ngIf="ticketForm.get('title')?.value">
+        <h6 class="preview-title">
+          <i class="fas fa-eye me-2"></i>
+          Preview
+        </h6>
+        <div class="task-preview">
+          <div class="preview-header">
+            <h5 class="preview-task-title">{{ ticketForm.get('title')?.value }}</h5>
+            <div class="preview-badges">
+              <span class="badge" [class]="'priority-' + (ticketForm.get('priority')?.value || 'medium').toLowerCase()">
+                {{ ticketForm.get('priority')?.value }}
+              </span>
+              <span class="badge bg-light text-dark">{{ ticketForm.get('category')?.value }}</span>
+            </div>
+          </div>
+          <p class="preview-description" *ngIf="ticketForm.get('description')?.value">
+            {{ ticketForm.get('description')?.value }}
+          </p>
+          <div class="preview-meta">
+            <div class="assignee-preview" *ngIf="ticketForm.get('assigneeId')?.value">
+              <div class="avatar avatar-sm">{{ getAssigneeAvatar(ticketForm.get('assigneeId')?.value) }}</div>
+              <!-- <span>Assigned to {{ familyMembers.find(m => m.id === ticketForm.get('assigneeId')?.value)?.firstName }}</span> TBD-->
+            </div>
+            <div class="due-date-preview" *ngIf="ticketForm.get('dueDate')?.value">
+              <i class="fas fa-calendar me-1"></i>
+              Due: {{ ticketForm.get('dueDate')?.value | date:'mediumDate' }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Error Message -->
+      <div class="alert alert-danger" *ngIf="errorMessage">
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        {{ errorMessage }}
+      </div>
+
+      <!-- Form Actions -->
+      <div class="form-actions">
+        <button 
+          type="button" 
+          class="btn btn-outline-secondary" 
+          (click)="onCancel()"
+          [disabled]="saving">
+          <i class="fas fa-times me-2"></i>
+          Cancel
+        </button>
+        <button 
+          type="submit" 
+          class="btn btn-primary"
+          [disabled]="!ticketForm.valid || saving">
+          <span *ngIf="saving" class="spinner-border spinner-border-sm me-2"></span>
+          <i *ngIf="!saving" class="fas fa-save me-2"></i>
+          {{ saving ? 'Saving...' : (isEditMode ? 'Update Task' : 'Create Task') }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

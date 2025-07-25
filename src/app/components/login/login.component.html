@@ -1,0 +1,166 @@
+<div class="login-container">
+  <div class="login-card">
+    <div class="text-center mb-4">
+      <h1 class="login-title">
+        <i class="fas fa-home me-2"></i>
+        Family Ticketing System
+      </h1>
+      <p class="text-muted">Organize your family tasks and chores</p>
+    </div>
+
+    <!-- Login Form -->
+    <form *ngIf="isLoginMode" [formGroup]="loginForm" (ngSubmit)="onLogin()" class="fade-in">
+      <div class="mb-3">
+        <label for="email" class="form-label">Email</label>
+        <input 
+          type="email" 
+          class="form-control" 
+          id="email" 
+          formControlName="email"
+          [class.is-invalid]="getFieldError(loginForm, 'email')"
+          placeholder="Enter your email">
+        <div class="invalid-feedback">
+          {{ getFieldError(loginForm, 'email') }}
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label for="password" class="form-label">Password</label>
+        <input 
+          type="password" 
+          class="form-control" 
+          id="password" 
+          formControlName="password"
+          [class.is-invalid]="getFieldError(loginForm, 'password')"
+          placeholder="Enter your password">
+        <div class="invalid-feedback">
+          {{ getFieldError(loginForm, 'password') }}
+        </div>
+      </div>
+
+      <div class="alert alert-danger" *ngIf="errorMessage">
+        {{ errorMessage }}
+      </div>
+
+      <button 
+        type="submit" 
+        class="btn btn-primary w-100 mb-3"
+        [disabled]="!loginForm.valid || isLoading">
+        <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2"></span>
+        {{ isLoading ? 'Signing in...' : 'Sign In' }}
+      </button>
+
+      <div class="text-center">
+        <p class="mb-0">
+          Don't have an account? 
+          <a href="#" (click)="toggleMode(); $event.preventDefault()" class="text-decoration-none">
+            Sign up here
+          </a>
+        </p>
+      </div>
+    </form>
+
+    <!-- Register Form -->
+    <form *ngIf="!isLoginMode" [formGroup]="registerForm" (ngSubmit)="onRegister()" class="fade-in">
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label for="firstName" class="form-label">First Name</label>
+          <input 
+            type="text" 
+            class="form-control" 
+            id="firstName" 
+            formControlName="firstName"
+            [class.is-invalid]="getFieldError(registerForm, 'firstName')"
+            placeholder="Enter first name">
+          <div class="invalid-feedback">
+            {{ getFieldError(registerForm, 'firstName') }}
+          </div>
+        </div>
+
+        <div class="col-md-6 mb-3">
+          <label for="lastName" class="form-label">Last Name</label>
+          <input 
+            type="text" 
+            class="form-control" 
+            id="lastName" 
+            formControlName="lastName"
+            [class.is-invalid]="getFieldError(registerForm, 'lastName')"
+            placeholder="Enter last name">
+          <div class="invalid-feedback">
+            {{ getFieldError(registerForm, 'lastName') }}
+          </div>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label for="registerEmail" class="form-label">Email</label>
+        <input 
+          type="email" 
+          class="form-control" 
+          id="registerEmail" 
+          formControlName="email"
+          [class.is-invalid]="getFieldError(registerForm, 'email')"
+          placeholder="Enter your email">
+        <div class="invalid-feedback">
+          {{ getFieldError(registerForm, 'email') }}
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label for="registerPassword" class="form-label">Password</label>
+        <input 
+          type="password" 
+          class="form-control" 
+          id="registerPassword" 
+          formControlName="password"
+          [class.is-invalid]="getFieldError(registerForm, 'password')"
+          placeholder="Enter your password">
+        <div class="invalid-feedback">
+          {{ getFieldError(registerForm, 'password') }}
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Choose your avatar</label>
+        <div class="avatar-selection">
+          <div 
+            *ngFor="let avatar of avatars" 
+            class="avatar-option"
+            [class.selected]="registerForm.get('avatar')?.value === avatar"
+            (click)="selectAvatar(avatar)">
+            {{ avatar }}
+          </div>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label for="role" class="form-label">Role</label>
+        <select class="form-select" id="role" formControlName="role">
+          <option value="Child">Child</option>
+          <option value="Parent">Parent</option>
+        </select>
+      </div>
+
+      <div class="alert alert-danger" *ngIf="errorMessage">
+        {{ errorMessage }}
+      </div>
+
+      <button 
+        type="submit" 
+        class="btn btn-primary w-100 mb-3"
+        [disabled]="!registerForm.valid || isLoading">
+        <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2"></span>
+        {{ isLoading ? 'Creating account...' : 'Create Account' }}
+      </button>
+
+      <div class="text-center">
+        <p class="mb-0">
+          Already have an account? 
+          <a href="#" (click)="toggleMode(); $event.preventDefault()" class="text-decoration-none">
+            Sign in here
+          </a>
+        </p>
+      </div>
+    </form>
+  </div>
+</div>
