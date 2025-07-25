@@ -1,0 +1,3 @@
+﻿<Project>
+  <Import Project="..\buildMultiTargeting\HO.FamilyTicketTracker.API.props" />
+</Project>
