@@ -1,0 +1,178 @@
+<div class="dashboard-container fade-in">
+  <div class="dashboard-header">
+    <h1 class="dashboard-title">
+      <i class="fas fa-tachometer-alt me-2"></i>
+      Welcome back, {{ currentUser?.firstName }}! 
+      <span class="user-avatar">{{ currentUser?.avatar }}</span>
+    </h1>
+    <p class="text-muted">Here's what's happening with your family tasks</p>
+  </div>
+
+  <div *ngIf="loading" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="mt-2 text-muted">Loading your dashboard...</p>
+  </div>
+
+  <div *ngIf="!loading" class="dashboard-content">
+    <!-- Statistics Cards -->
+    <div class="stats-grid mb-4">
+      <div class="stat-card">
+        <div class="stat-icon">
+          <i class="fas fa-tasks"></i>
+        </div>
+        <div class="stat-content">
+          <h3>{{ stats.myTickets }}</h3>
+          <p>My Tasks</p>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon completed">
+          <i class="fas fa-check-circle"></i>
+        </div>
+        <div class="stat-content">
+          <h3>{{ stats.completedTickets }}</h3>
+          <p>Completed</p>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon overdue">
+          <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <div class="stat-content">
+          <h3>{{ stats.overdueTickets }}</h3>
+          <p>Overdue</p>
+        </div>
+      </div>
+
+      <div class="stat-card" *ngIf="isParent()">
+        <div class="stat-icon pending">
+          <i class="fas fa-clock"></i>
+        </div>
+        <div class="stat-content">
+          <h3>{{ stats.pendingReview }}</h3>
+          <p>Pending Review</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions mb-4">
+      <a routerLink="/tickets/new" class="btn btn-primary">
+        <i class="fas fa-plus me-2"></i>
+        Create New Task
+      </a>
+      <a routerLink="/tickets" class="btn btn-outline-primary">
+        <i class="fas fa-list me-2"></i>
+        View All Tasks
+      </a>
+    </div>
+
+    <div class="row">
+      <!-- My Tasks -->
+      <div class="col-lg-8 mb-4">
+        <div class="card">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">
+              <i class="fas fa-user-tasks me-2"></i>
+              My Tasks
+            </h5>
+            <a routerLink="/tickets" class="btn btn-sm btn-outline-primary">View All</a>
+          </div>
+          <div class="card-body">
+            <div *ngIf="myTickets.length === 0" class="text-center py-4">
+              <i class="fas fa-check-circle text-success" style="font-size: 3rem;"></i>
+              <h6 class="mt-2">All caught up!</h6>
+              <p class="text-muted">You have no pending tasks at the moment.</p>
+            </div>
+
+            <div *ngFor="let ticket of myTickets.slice(0, 5)" class="ticket-item">
+              <div class="ticket-header">
+                <h6 class="ticket-title">{{ ticket.title }}</h6>
+                <div class="ticket-badges">
+                  <span class="badge" [class]="getPriorityClass(ticket.priority)">{{ ticket.priority }}</span>
+                  <span class="badge" [class]="getStatusClass(ticket.status)">{{ ticket.status }}</span>
+                </div>
+              </div>
+              <p class="ticket-description">{{ ticket.description }}</p>
+              <div class="ticket-meta">
+                <span class="text-muted">
+                  <i class="fas fa-calendar-alt me-1"></i>
+                  Due: {{ ticket.dueDate ? formatDate(ticket.dueDate) : 'No due date' }}
+                </span>
+                <span class="text-muted ms-3">
+                  <i class="fas fa-tag me-1"></i>
+                  {{ ticket.category }}
+                </span>
+              </div>
+              <div class="ticket-actions mt-2">
+                <a [routerLink]="['/tickets', ticket.id]" class="btn btn-sm btn-outline-primary">
+                  <i class="fas fa-eye me-1"></i>
+                  View Details
+                </a>
+                <button 
+                  *ngIf="ticket.status === 'Open' || ticket.status === 'In Progress'"
+                  (click)="completeTicket(ticket)"
+                  class="btn btn-sm btn-success ms-2">
+                  <i class="fas fa-check me-1"></i>
+                  Mark Complete
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Family Members & Recent Activity -->
+      <div class="col-lg-4">
+        <!-- Family Members -->
+        <div class="card mb-4">
+          <div class="card-header">
+            <h5 class="card-title mb-0">
+              <i class="fas fa-users me-2"></i>
+              Family Members
+            </h5>
+          </div>
+          <div class="card-body">
+            <div *ngFor="let member of familyMembers" class="family-member-item">
+              <div class="avatar">{{ member.avatar }}</div>
+              <div class="member-info">
+                <h6>{{ member.firstName }} {{ member.lastName }}</h6>
+                <small class="text-muted">{{ member.role }}</small>
+              </div>
+              <div class="member-stats">
+                <span class="badge bg-light text-dark">{{ member.completedTasks }} tasks</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="card">
+          <div class="card-header">
+            <h5 class="card-title mb-0">
+              <i class="fas fa-clock me-2"></i>
+              Recent Activity
+            </h5>
+          </div>
+          <div class="card-body">
+            <div *ngFor="let ticket of recentTickets" class="recent-activity-item">
+              <div class="activity-icon">
+                <i class="fas fa-file-alt"></i>
+              </div>
+              <div class="activity-content">
+                <h6>{{ ticket.title }}</h6>
+                <small class="text-muted">
+                  Created by {{ ticket.createdByName }} • {{ formatDate(ticket.createdAt) }}
+                </small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

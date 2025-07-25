@@ -1,0 +1,281 @@
+<div class="ticket-detail-container fade-in">
+  <div *ngIf="loading" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="mt-2 text-muted">Loading ticket details...</p>
+  </div>
+
+  <div *ngIf="errorMessage" class="alert alert-danger">
+    <i class="fas fa-exclamation-triangle me-2"></i>
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="ticket && !loading" class="ticket-content">
+    <!-- Header -->
+    <div class="ticket-header">
+      <div class="header-left">
+        <button class="btn btn-outline-secondary btn-sm" (click)="router.navigate(['/tickets'])">
+          <i class="fas fa-arrow-left me-2"></i>
+          Back to Tasks
+        </button>
+        <h1 class="ticket-title">{{ ticket.title }}</h1>
+        <div class="ticket-badges">
+          <span class="badge" [class]="getPriorityClass(ticket.priority)">{{ ticket.priority }}</span>
+          <span class="badge" [class]="getStatusClass(ticket.status)">{{ ticket.status }}</span>
+          <span class="badge bg-light text-dark">{{ ticket.category }}</span>
+          <span class="badge bg-danger" *ngIf="isOverdue()">Overdue</span>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button 
+          *ngIf="canEdit()" 
+          class="btn btn-outline-primary btn-sm"
+          [routerLink]="['/tickets', ticket.id, 'edit']">
+          <i class="fas fa-edit me-2"></i>
+          Edit
+        </button>
+        <div class="dropdown">
+          <button 
+            class="btn btn-outline-secondary btn-sm dropdown-toggle" 
+            type="button" 
+            data-bs-toggle="dropdown">
+            <i class="fas fa-ellipsis-v"></i>
+          </button>
+          <ul class="dropdown-menu">
+            <li *ngIf="canComplete()">
+              <button class="dropdown-item" (click)="completeTicket()">
+                <i class="fas fa-check me-2"></i>Mark Complete
+              </button>
+            </li>
+            <li *ngIf="canApprove()">
+              <button class="dropdown-item text-success" (click)="approveTicket()">
+                <i class="fas fa-thumbs-up me-2"></i>Approve
+              </button>
+            </li>
+            <li *ngIf="canApprove()">
+              <button class="dropdown-item text-warning" (click)="rejectTicket()">
+                <i class="fas fa-thumbs-down me-2"></i>Reject
+              </button>
+            </li>
+            <li *ngIf="canDelete()">
+              <hr class="dropdown-divider">
+              <button class="dropdown-item text-danger" (click)="deleteTicket()">
+                <i class="fas fa-trash me-2"></i>Delete
+              </button>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="progress-section mb-4">
+      <div class="progress-header">
+        <span class="progress-label">Progress</span>
+        <span class="progress-percentage">{{ getProgressPercentage() }}%</span>
+      </div>
+      <div class="progress">
+        <div 
+          class="progress-bar"
+          [class]="'bg-' + getProgressColor()"
+          [style.width.%]="getProgressPercentage()">
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <!-- Main Content -->
+      <div class="col-lg-8">
+        <!-- Description -->
+        <div class="card mb-4">
+          <div class="card-header">
+            <h5 class="card-title mb-0">
+              <i class="fas fa-align-left me-2"></i>
+              Description
+            </h5>
+          </div>
+          <div class="card-body">
+            <p class="ticket-description" *ngIf="ticket.description; else noDescription">
+              {{ ticket.description }}
+            </p>
+            <ng-template #noDescription>
+              <p class="text-muted">No description provided</p>
+            </ng-template>
+          </div>
+        </div>
+
+        <!-- Photo -->
+        <div class="card mb-4" *ngIf="ticket.photoUrl">
+          <div class="card-header">
+            <h5 class="card-title mb-0">
+              <i class="fas fa-image me-2"></i>
+              Photo
+            </h5>
+          </div>
+          <div class="card-body">
+            <img [src]="ticket.photoUrl" class="img-fluid rounded" [alt]="ticket.title">
+          </div>
+        </div>
+
+        <!-- Comments -->
+        <div class="card">
+          <div class="card-header">
+            <h5 class="card-title mb-0">
+              <i class="fas fa-comments me-2"></i>
+              Comments ({{ comments.length }})
+            </h5>
+          </div>
+          <div class="card-body">
+            <div *ngIf="loadingComments" class="text-center py-3">
+              <div class="spinner-border spinner-border-sm text-primary" role="status">
+                <span class="visually-hidden">Loading comments...</span>
+              </div>
+            </div>
+
+            <div *ngIf="!loadingComments && comments.length === 0" class="text-center py-4">
+              <i class="fas fa-comments text-muted" style="font-size: 2rem;"></i>
+              <p class="text-muted mt-2">No comments yet. Be the first to comment!</p>
+            </div>
+
+            <div class="comments-list" *ngIf="comments.length > 0">
+              <div *ngFor="let comment of comments" class="comment-item">
+                <div class="comment-avatar">
+                  <div class="avatar">{{ comment.userAvatar }}</div>
+                </div>
+                <div class="comment-content">
+                  <div class="comment-header">
+                    <h6 class="comment-author">{{ comment.userName }}</h6>
+                    <small class="comment-date">{{ formatDate(comment.createdAt) }}</small>
+                  </div>
+                  <p class="comment-text">{{ comment.content }}</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Add Comment Form -->
+            <div class="add-comment-section" *ngIf="canAddComment()">
+              <div class="comment-form">
+                <div class="comment-avatar">
+                  <div class="avatar">{{ currentUser?.avatar }}</div>
+                </div>
+                <div class="comment-input">
+                  <textarea 
+                    class="form-control" 
+                    [(ngModel)]="newComment"
+                    placeholder="Add a comment..."
+                    rows="3"
+                    maxlength="500"
+                    [disabled]="submittingComment"></textarea>
+                  <div class="comment-actions">
+                    <div class="character-count">
+                      {{ newComment.length }}/500
+                    </div>
+                    <button 
+                      class="btn btn-primary btn-sm"
+                      (click)="addComment()"
+                      [disabled]="!newComment.trim() || submittingComment">
+                      <span *ngIf="submittingComment" class="spinner-border spinner-border-sm me-2"></span>
+                      <i *ngIf="!submittingComment" class="fas fa-paper-plane me-2"></i>
+                      {{ submittingComment ? 'Adding...' : 'Add Comment' }}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sidebar -->
+      <div class="col-lg-4">
+        <!-- Task Info -->
+        <div class="card mb-4">
+          <div class="card-header">
+            <h5 class="card-title mb-0">
+              <i class="fas fa-info-circle me-2"></i>
+              Task Information
+            </h5>
+          </div>
+          <div class="card-body">
+            <div class="info-item">
+              <label>Assignee</label>
+              <div class="assignee-info">
+                <div class="avatar avatar-sm">{{ ticket.assigneeAvatar }}</div>
+                <span>{{ ticket.assigneeName }}</span>
+              </div>
+            </div>
+
+            <div class="info-item">
+              <label>Created By</label>
+              <div class="creator-info">
+                <span>{{ ticket.createdByName }}</span>
+                <small class="text-muted">{{ formatDate(ticket.createdAt) }}</small>
+              </div>
+            </div>
+
+            <div class="info-item" *ngIf="ticket.dueDate">
+              <label>Due Date</label>
+              <div class="due-date-info">
+                <i class="fas fa-calendar-alt me-2"></i>
+                <span [class.text-danger]="isOverdue()">{{ formatDateShort(ticket.dueDate) }}</span>
+              </div>
+            </div>
+
+            <div class="info-item" *ngIf="ticket.completedAt">
+              <label>Completed</label>
+              <div class="completed-info">
+                <i class="fas fa-check-circle me-2 text-success"></i>
+                <span>{{ formatDate(ticket.completedAt) }}</span>
+              </div>
+            </div>
+
+            <div class="info-item" *ngIf="ticket.approvedAt">
+              <label>Approved</label>
+              <div class="approved-info">
+                <i class="fas fa-thumbs-up me-2 text-success"></i>
+                <span>{{ formatDate(ticket.approvedAt) }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="card" *ngIf="canComplete() || canApprove()">
+          <div class="card-header">
+            <h5 class="card-title mb-0">
+              <i class="fas fa-bolt me-2"></i>
+              Quick Actions
+            </h5>
+          </div>
+          <div class="card-body">
+            <button 
+              *ngIf="canComplete()" 
+              class="btn btn-success w-100 mb-2"
+              (click)="completeTicket()">
+              <i class="fas fa-check me-2"></i>
+              Mark as Complete
+            </button>
+            <button 
+              *ngIf="canApprove()" 
+              class="btn btn-primary w-100 mb-2"
+              (click)="approveTicket()">
+              <i class="fas fa-thumbs-up me-2"></i>
+              Approve Task
+            </button>
+            <button 
+              *ngIf="canApprove()" 
+              class="btn btn-warning w-100"
+              (click)="rejectTicket()">
+              <i class="fas fa-thumbs-down me-2"></i>
+              Reject Task
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Bootstrap JS for dropdown functionality -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
