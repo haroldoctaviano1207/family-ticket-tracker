@@ -3,6 +3,7 @@ using System;
 using HO.FamilyTicketTracker.API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace HO.FamilyTicketTracker.API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250729123659_FixDateCreatedUpdated")]
+    partial class FixDateCreatedUpdated
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -73,7 +76,7 @@ namespace HO.FamilyTicketTracker.API.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasDefaultValue(new DateTime(2025, 7, 29, 12, 40, 59, 435, DateTimeKind.Utc).AddTicks(3580));
+                        .HasDefaultValueSql("NOW()");
 
                     b.Property<string>("DisplayName")
                         .IsRequired()
@@ -90,7 +93,7 @@ namespace HO.FamilyTicketTracker.API.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasDefaultValue(new DateTime(2025, 7, 29, 12, 40, 59, 435, DateTimeKind.Utc).AddTicks(3876));
+                        .HasDefaultValueSql("NOW()");
 
                     b.HasKey("Id");
 

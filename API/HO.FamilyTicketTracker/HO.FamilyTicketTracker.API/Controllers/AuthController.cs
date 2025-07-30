@@ -5,7 +5,7 @@ using HO.FamilyTicketTracker.API.Models;
 namespace HO.FamilyTicketTracker.API.Controllers
 {
   [ApiController]
-  [Route("api/[controller]")]
+  [Route("[controller]")]
   public class AuthController : ControllerBase
   {
     private readonly AuthService _authService;

@@ -3,19 +3,21 @@ using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using HO.FamilyTicketTracker.API.Services;
 using HO.FamilyTicketTracker.API.Models;
+using HO.FamilyTicketTracker.API.Repository;
+using HO.FamilyTicketTracker.API.Models.DTOs;
 
 namespace HO.FamilyTicketTracker.API.Controllers
 {
   [ApiController]
-  [Route("api/[controller]")]
+  [Route("[controller]")]
   [Authorize]
   public class TicketController : ControllerBase
   {
-    private readonly TicketService _ticketService;
+    private readonly ITicketRepository _ticketRepository;
 
-    public TicketController(TicketService ticketService)
+    public TicketController(ITicketRepository ticketRepository)
     {
-      _ticketService = ticketService;
+      _ticketRepository = ticketRepository;
     }
 
     [HttpGet]
@@ -23,30 +25,9 @@ namespace HO.FamilyTicketTracker.API.Controllers
     {
       try
       {
-        var tickets = await _ticketService.GetAllTicketsAsync();
-        var ticketDtos = tickets.Select(t => new TicketDto
-        {
-          Id = t.Id,
-          Title = t.Title,
-          Description = t.Description,
-          AssigneeId = t.AssigneeId,
-          AssigneeName = $"{t.Assignee.FirstName} {t.Assignee.LastName}",
-          AssigneeAvatar = t.Assignee.Avatar,
-          CreatedById = t.CreatedById,
-          CreatedByName = $"{t.CreatedBy.FirstName} {t.CreatedBy.LastName}",
-          CreatedAt = t.CreatedAt,
-          DueDate = t.DueDate,
-          Priority = t.Priority,
-          Category = t.Category,
-          Status = t.Status,
-          PhotoUrl = t.PhotoUrl,
-          CompletedAt = t.CompletedAt,
-          ApprovedAt = t.ApprovedAt,
-          IsOverdue = t.DueDate.HasValue && t.DueDate < DateTime.UtcNow && t.Status != Constants.CompletedStatus,
-          CommentsCount = t.Comments.Count
-        });
-
-        return Ok(ticketDtos);
+        var tickets = await _ticketRepository.GetAllAsync();
+        
+        return Ok(tickets.Select(t => t.ToTicketModel()));
       }
       catch (Exception ex)
       {
@@ -59,33 +40,11 @@ namespace HO.FamilyTicketTracker.API.Controllers
     {
       try
       {
-        var ticket = await _ticketService.GetTicketByIdAsync(id);
+        var ticket = await _ticketRepository.GetAsync(id);
         if (ticket == null)
           return NotFound();
 
-        var ticketDto = new TicketDto
-        {
-          Id = ticket.Id,
-          Title = ticket.Title,
-          Description = ticket.Description,
-          AssigneeId = ticket.AssigneeId,
-          AssigneeName = $"{ticket.Assignee.FirstName} {ticket.Assignee.LastName}",
-          AssigneeAvatar = ticket.Assignee.Avatar,
-          CreatedById = ticket.CreatedById,
-          CreatedByName = $"{ticket.CreatedBy.FirstName} {ticket.CreatedBy.LastName}",
-          CreatedAt = ticket.CreatedAt,
-          DueDate = ticket.DueDate,
-          Priority = ticket.Priority,
-          Category = ticket.Category,
-          Status = ticket.Status,
-          PhotoUrl = ticket.PhotoUrl,
-          CompletedAt = ticket.CompletedAt,
-          ApprovedAt = ticket.ApprovedAt,
-          IsOverdue = ticket.DueDate.HasValue && ticket.DueDate < DateTime.UtcNow && ticket.Status != Constants.CompletedStatus,
-          CommentsCount = ticket.Comments.Count
-        };
-
-        return Ok(ticketDto);
+        return Ok(ticket.ToTicketModel());
       }
       catch (Exception ex)
       {
@@ -94,7 +53,7 @@ namespace HO.FamilyTicketTracker.API.Controllers
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreateTicket([FromBody] CreateTicketRequest request)
+    public async Task<IActionResult> CreateTicket([FromBody] TicketRequestModel request)
     {
       try
       {
@@ -102,19 +61,7 @@ namespace HO.FamilyTicketTracker.API.Controllers
         if (userId == null)
           return Unauthorized();
 
-        var ticket = new Ticket
-        {
-          Title = request.Title,
-          Description = request.Description,
-          AssigneeId = request.AssigneeId,
-          CreatedById = userId,
-          DueDate = request.DueDate,
-          Priority = request.Priority,
-          Category = request.Category,
-          PhotoUrl = request.PhotoUrl
-        };
-
-        var createdTicket = await _ticketService.CreateTicketAsync(ticket);
+        var createdTicket = await _ticketRepository.CreateAsync(request.ToTicket(userId));
         return CreatedAtAction(nameof(GetTicket), new { id = createdTicket.Id }, createdTicket);
       }
       catch (Exception ex)
@@ -124,27 +71,15 @@ namespace HO.FamilyTicketTracker.API.Controllers
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateTicket(int id, [FromBody] UpdateTicketRequest request)
+    public async Task<IActionResult> UpdateTicket(int id, [FromBody] TicketRequestModel request)
     {
       try
       {
-        var existingTicket = await _ticketService.GetTicketByIdAsync(id);
+        var existingTicket = await _ticketRepository.GetAsync(id);
         if (existingTicket == null)
           return NotFound();
 
-        var updatedTicket = new Ticket
-        {
-          Title = request.Title ?? existingTicket.Title,
-          Description = request.Description ?? existingTicket.Description,
-          AssigneeId = request.AssigneeId ?? existingTicket.AssigneeId,
-          DueDate = request.DueDate ?? existingTicket.DueDate,
-          Priority = request.Priority ?? existingTicket.Priority,
-          Category = request.Category ?? existingTicket.Category,
-          Status = request.Status ?? existingTicket.Status,
-          PhotoUrl = request.PhotoUrl ?? existingTicket.PhotoUrl
-        };
-
-        var result = await _ticketService.UpdateTicketAsync(id, updatedTicket);
+        var result = await _ticketRepository.UpdateAsync(id, request.ToTicket(existingTicket));
         if (result == null)
           return NotFound();
 
@@ -161,7 +96,7 @@ namespace HO.FamilyTicketTracker.API.Controllers
     {
       try
       {
-        var success = await _ticketService.DeleteTicketAsync(id);
+        var success = await _ticketRepository.DeleteAsync(id);
         if (!success)
           return NotFound();
 
@@ -178,7 +113,7 @@ namespace HO.FamilyTicketTracker.API.Controllers
     {
       try
       {
-        var ticket = await _ticketService.CompleteTicketAsync(id);
+        var ticket = await _ticketRepository.CompleteAsync(id);
         if (ticket == null)
           return NotFound();
 
@@ -195,7 +130,7 @@ namespace HO.FamilyTicketTracker.API.Controllers
     {
       try
       {
-        var ticket = await _ticketService.ApproveTicketAsync(id);
+        var ticket = await _ticketRepository.ApproveAsync(id);
         if (ticket == null)
           return NotFound();
 
@@ -212,7 +147,7 @@ namespace HO.FamilyTicketTracker.API.Controllers
     {
       try
       {
-        var ticket = await _ticketService.RejectTicketAsync(id);
+        var ticket = await _ticketRepository.RejectAsync(id);
         if (ticket == null)
           return NotFound();
 
@@ -229,7 +164,7 @@ namespace HO.FamilyTicketTracker.API.Controllers
     {
       try
       {
-        var tickets = await _ticketService.GetTicketsByUserIdAsync(userId);
+        var tickets = await _ticketRepository.GetTicketsByUserIdAsync(userId);
         return Ok(tickets);
       }
       catch (Exception ex)
@@ -243,7 +178,7 @@ namespace HO.FamilyTicketTracker.API.Controllers
     {
       try
       {
-        var tickets = await _ticketService.GetTicketsByStatusAsync(status);
+        var tickets = await _ticketRepository.GetTicketsByStatusAsync(status);
         return Ok(tickets);
       }
       catch (Exception ex)
@@ -251,50 +186,5 @@ namespace HO.FamilyTicketTracker.API.Controllers
         return BadRequest(new { message = ex.Message });
       }
     }
-  }
-
-  public class CreateTicketRequest
-  {
-    public string Title { get; set; } = string.Empty;
-    public string Description { get; set; } = string.Empty;
-    public string AssigneeId { get; set; } = string.Empty;
-    public DateTime? DueDate { get; set; }
-    public int Priority { get; set; }
-    public int Category { get; set; }
-    public string? PhotoUrl { get; set; }
-  }
-
-  public class UpdateTicketRequest
-  {
-    public string? Title { get; set; }
-    public string? Description { get; set; }
-    public string? AssigneeId { get; set; }
-    public DateTime? DueDate { get; set; }
-    public int? Priority { get; set; }
-    public int? Category { get; set; }
-    public int? Status { get; set; }
-    public string? PhotoUrl { get; set; }
-  }
-
-  public class TicketDto
-  {
-    public int Id { get; set; }
-    public string Title { get; set; } = string.Empty;
-    public string Description { get; set; } = string.Empty;
-    public string AssigneeId { get; set; } = string.Empty;
-    public string AssigneeName { get; set; } = string.Empty;
-    public string AssigneeAvatar { get; set; } = string.Empty;
-    public string CreatedById { get; set; } = string.Empty;
-    public string CreatedByName { get; set; } = string.Empty;
-    public DateTime CreatedAt { get; set; }
-    public DateTime? DueDate { get; set; }
-    public int Priority { get; set; }
-    public int Category { get; set; }
-    public int Status { get; set; }
-    public string? PhotoUrl { get; set; }
-    public DateTime? CompletedAt { get; set; }
-    public DateTime? ApprovedAt { get; set; }
-    public bool IsOverdue { get; set; }
-    public int CommentsCount { get; set; }
   }
 }

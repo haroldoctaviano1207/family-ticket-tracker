@@ -9,6 +9,7 @@ using Microsoft.OpenApi.Models;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using HO.FamilyTicketTracker.API.Repository;
 
 namespace HO.FamilyTicketTracker.API
 {
@@ -20,7 +21,17 @@ namespace HO.FamilyTicketTracker.API
 
       builder.Services.AddControllers();
       builder.Services.AddEndpointsApiExplorer();
-      builder.Services.AddSwaggerGen();
+      builder.Services.AddSwaggerGen(c =>
+      {
+        c.SwaggerDoc("v1", new OpenApiInfo
+        {
+          Title = "Family Ticket Tracker API (FTT)",
+          Version = "v1",
+          Description = "An API for managing family tickets and related data."
+        });
+
+        c.AddServer(new OpenApiServer { Url = "/ftt" });
+      });
 
       var connectionString = builder.Configuration.GetConnectionString("sqlConn");
       builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(connectionString));
@@ -62,8 +73,11 @@ namespace HO.FamilyTicketTracker.API
         };
       });
 
+      builder.Services.AddScoped<IUserRepository, UserRepository>();
+      builder.Services.AddScoped<ILookUpRepository, LookUpRepository>();
+      builder.Services.AddScoped<ITicketRepository, TicketRepository>();
+      builder.Services.AddScoped<ICommentRepository, CommentRepository>();
       builder.Services.AddScoped<AuthService>();
-      builder.Services.AddScoped<TicketService>();
 
       var app = builder.Build();
 
@@ -72,8 +86,6 @@ namespace HO.FamilyTicketTracker.API
       app.UseAuthorization();
 
       app.UseStaticFiles();
-
-      app.MapControllers();
 
       using (var scope = app.Services.CreateScope())
       {
@@ -87,6 +99,8 @@ namespace HO.FamilyTicketTracker.API
       }
       app.UseSwagger();
       app.UseSwaggerUI();
+
+      app.MapGroup("/ftt").MapControllers();
 
       app.Run();
     }

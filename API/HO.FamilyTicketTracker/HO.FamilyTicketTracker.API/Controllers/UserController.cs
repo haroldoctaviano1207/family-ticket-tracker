@@ -7,7 +7,7 @@ using HO.FamilyTicketTracker.API.Models;
 namespace HO.FamilyTicketTracker.API.Controllers
 {
   [ApiController]
-  [Route("api/[controller]")]
+  [Route("[controller]")]
   [Authorize]
   public class UserController : ControllerBase
   {

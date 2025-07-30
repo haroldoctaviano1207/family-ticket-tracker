@@ -15,7 +15,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("HO.FamilyTicketTracker.API")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+fb3faa7b42e4e1e87841019fdc4c16338cdf941e")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c5f1b0d1eb010b826aa1a68044279ffd2d5f1a73")]
 [assembly: System.Reflection.AssemblyProductAttribute("HO.FamilyTicketTracker.API")]
 [assembly: System.Reflection.AssemblyTitleAttribute("HO.FamilyTicketTracker.API")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -4,19 +4,21 @@ using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using HO.FamilyTicketTracker.API.Data;
 using HO.FamilyTicketTracker.API.Models;
+using HO.FamilyTicketTracker.API.Repository;
+using HO.FamilyTicketTracker.API.Models.DTOs;
 
 namespace HO.FamilyTicketTracker.API.Controllers
 {
   [ApiController]
-  [Route("api/[controller]")]
+  [Route("[controller]")]
   [Authorize]
   public class CommentController : ControllerBase
   {
-    private readonly ApplicationDbContext _context;
+    private readonly ICommentRepository _commentRepository;
 
-    public CommentController(ApplicationDbContext context)
+    public CommentController(ICommentRepository commentRepository)
     {
-      _context = context;
+      _commentRepository = commentRepository;
     }
 
     [HttpGet("ticket/{ticketId}")]
@@ -24,23 +26,9 @@ namespace HO.FamilyTicketTracker.API.Controllers
     {
       try
       {
-        var comments = await _context.Comments
-            .Include(c => c.User)
-            .Where(c => c.TicketId == ticketId)
-            .OrderBy(c => c.CreatedAt)
-            .Select(c => new CommentDto
-            {
-              Id = c.Id,
-              Content = c.Content,
-              UserId = c.UserId,
-              UserName = $"{c.User.FirstName} {c.User.LastName}",
-              UserAvatar = c.User.Avatar,
-              TicketId = c.TicketId,
-              CreatedAt = c.CreatedAt
-            })
-            .ToListAsync();
+        var comments = await _commentRepository.GetAllAsync(ticketId);
 
-        return Ok(comments);
+        return Ok(comments.Select(c => c.ToCommentModel()));
       }
       catch (Exception ex)
       {
@@ -64,25 +52,9 @@ namespace HO.FamilyTicketTracker.API.Controllers
           TicketId = request.TicketId
         };
 
-        _context.Comments.Add(comment);
-        await _context.SaveChangesAsync();
+        var result = await _commentRepository.InsertAsync(comment);
 
-        var createdComment = await _context.Comments
-            .Include(c => c.User)
-            .FirstOrDefaultAsync(c => c.Id == comment.Id);
-
-        var commentDto = new CommentDto
-        {
-          Id = createdComment!.Id,
-          Content = createdComment.Content,
-          UserId = createdComment.UserId,
-          UserName = $"{createdComment.User.FirstName} {createdComment.User.LastName}",
-          UserAvatar = createdComment.User.Avatar,
-          TicketId = createdComment.TicketId,
-          CreatedAt = createdComment.CreatedAt
-        };
-
-        return CreatedAtAction(nameof(GetComments), new { ticketId = request.TicketId }, commentDto);
+        return CreatedAtAction(nameof(GetComments), new { ticketId = request.TicketId }, result.ToCommentModel());
       }
       catch (Exception ex)
       {
@@ -95,7 +67,7 @@ namespace HO.FamilyTicketTracker.API.Controllers
     {
       try
       {
-        var comment = await _context.Comments.FindAsync(id);
+        var comment = await _commentRepository.FindAsync(id);
         if (comment == null)
           return NotFound();
 
@@ -106,8 +78,7 @@ namespace HO.FamilyTicketTracker.API.Controllers
         if (comment.UserId != userId && userRole != "Parent")
           return Forbid();
 
-        _context.Comments.Remove(comment);
-        await _context.SaveChangesAsync();
+        await _commentRepository.DeleteAsync(id);
 
         return NoContent();
       }

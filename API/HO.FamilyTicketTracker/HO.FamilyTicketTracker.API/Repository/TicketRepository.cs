@@ -1,19 +1,32 @@
-using Microsoft.EntityFrameworkCore;
 using HO.FamilyTicketTracker.API.Data;
 using HO.FamilyTicketTracker.API.Models;
+using Microsoft.EntityFrameworkCore;
 
-namespace HO.FamilyTicketTracker.API.Services
+namespace HO.FamilyTicketTracker.API.Repository
 {
-  public class TicketService
+  public interface ITicketRepository
+  {
+    Task<IEnumerable<Ticket>> GetAllAsync();
+    Task<Ticket> CreateAsync(Ticket ticket);
+    Task<Ticket?> UpdateAsync(int id, Ticket updatedTicket);
+    Task<Ticket?> GetAsync(int id);
+    Task<bool> DeleteAsync(int id);
+    Task<Ticket?> CompleteAsync(int id);
+    Task<Ticket?> ApproveAsync(int id);
+    Task<Ticket?> RejectAsync(int id);
+    Task<IEnumerable<Ticket>> GetTicketsByUserIdAsync(string userId);
+    Task<IEnumerable<Ticket>> GetTicketsByStatusAsync(int status);
+  }
+  public class TicketRepository : ITicketRepository
   {
     private readonly ApplicationDbContext _context;
 
-    public TicketService(ApplicationDbContext context)
+    public TicketRepository(ApplicationDbContext context)
     {
       _context = context;
     }
 
-    public async Task<IEnumerable<Ticket>> GetAllTicketsAsync()
+    public async Task<IEnumerable<Ticket>> GetAllAsync()
     {
       return await _context.Tickets
           .Include(t => t.Assignee)
@@ -23,7 +36,7 @@ namespace HO.FamilyTicketTracker.API.Services
           .ToListAsync();
     }
 
-    public async Task<Ticket?> GetTicketByIdAsync(int id)
+    public async Task<Ticket?> GetAsync(int id)
     {
       return await _context.Tickets
           .Include(t => t.Assignee)
@@ -33,14 +46,14 @@ namespace HO.FamilyTicketTracker.API.Services
           .FirstOrDefaultAsync(t => t.Id == id);
     }
 
-    public async Task<Ticket> CreateTicketAsync(Ticket ticket)
+    public async Task<Ticket> CreateAsync(Ticket ticket)
     {
       _context.Tickets.Add(ticket);
       await _context.SaveChangesAsync();
-      return await GetTicketByIdAsync(ticket.Id) ?? ticket;
+      return await GetAsync(ticket.Id) ?? ticket;
     }
 
-    public async Task<Ticket?> UpdateTicketAsync(int id, Ticket updatedTicket)
+    public async Task<Ticket?> UpdateAsync(int id, Ticket updatedTicket)
     {
       var existingTicket = await _context.Tickets.FindAsync(id);
       if (existingTicket == null)
@@ -56,10 +69,10 @@ namespace HO.FamilyTicketTracker.API.Services
       existingTicket.PhotoUrl = updatedTicket.PhotoUrl;
 
       await _context.SaveChangesAsync();
-      return await GetTicketByIdAsync(id);
+      return await GetAsync(id);
     }
 
-    public async Task<bool> DeleteTicketAsync(int id)
+    public async Task<bool> DeleteAsync(int id)
     {
       var ticket = await _context.Tickets.FindAsync(id);
       if (ticket == null)
@@ -70,40 +83,40 @@ namespace HO.FamilyTicketTracker.API.Services
       return true;
     }
 
-    public async Task<Ticket?> CompleteTicketAsync(int id)
+    public async Task<Ticket?> CompleteAsync(int id)
     {
       var ticket = await _context.Tickets.FindAsync(id);
       if (ticket == null)
         return null;
 
-      ticket.Status = 3;
+      ticket.Status = (int)TicketStatus.PendingReview;
       ticket.CompletedAt = DateTime.UtcNow;
       await _context.SaveChangesAsync();
-      return await GetTicketByIdAsync(id);
+      return await GetAsync(id);
     }
 
-    public async Task<Ticket?> ApproveTicketAsync(int id)
+    public async Task<Ticket?> ApproveAsync(int id)
     {
       var ticket = await _context.Tickets.FindAsync(id);
       if (ticket == null)
         return null;
 
-      ticket.Status = 4;
+      ticket.Status = (int)TicketStatus.Completed;
       ticket.ApprovedAt = DateTime.UtcNow;
       await _context.SaveChangesAsync();
-      return await GetTicketByIdAsync(id);
+      return await GetAsync(id);
     }
 
-    public async Task<Ticket?> RejectTicketAsync(int id)
+    public async Task<Ticket?> RejectAsync(int id)
     {
       var ticket = await _context.Tickets.FindAsync(id);
       if (ticket == null)
         return null;
 
-      ticket.Status = 2;
+      ticket.Status = (int)TicketStatus.Cancelled;
       ticket.CompletedAt = null;
       await _context.SaveChangesAsync();
-      return await GetTicketByIdAsync(id);
+      return await GetAsync(id);
     }
 
     public async Task<IEnumerable<Ticket>> GetTicketsByUserIdAsync(string userId)
