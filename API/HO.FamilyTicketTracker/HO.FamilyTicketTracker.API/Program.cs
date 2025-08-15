@@ -79,6 +79,14 @@ namespace HO.FamilyTicketTracker.API
       builder.Services.AddScoped<ICommentRepository, CommentRepository>();
       builder.Services.AddScoped<AuthService>();
 
+      var reddisSettings = builder.Configuration.GetSection("ReddisSettings");
+
+      builder.Services.AddStackExchangeRedisCache(options =>
+      {
+        options.Configuration = reddisSettings["reddisConn"];
+        options.InstanceName = reddisSettings["InstanceName"];
+      });
+
       var app = builder.Build();
 
       app.UseCors();

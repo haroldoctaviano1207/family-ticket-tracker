@@ -24,4 +24,10 @@ namespace HO.FamilyTicketTracker.API.Models
         [ForeignKey("TicketId")]
         public Ticket Ticket { get; set; } = null!;
     }
+
+    public class CreateCommentRequest
+    {
+      public string Content { get; set; } = string.Empty;
+      public int TicketId { get; set; }
+    }
 }
