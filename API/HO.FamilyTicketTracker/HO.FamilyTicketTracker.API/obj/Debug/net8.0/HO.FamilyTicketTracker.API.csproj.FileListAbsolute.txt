@@ -122,3 +122,7 @@ C:\Users\ADMIN\Desktop\Project\family-ticket-tracker\API\HO.FamilyTicketTracker\
 C:\Users\ADMIN\Desktop\Project\family-ticket-tracker\API\HO.FamilyTicketTracker\HO.FamilyTicketTracker.API\obj\Debug\net8.0\HO.FamilyTicketTracker.API.pdb
 C:\Users\ADMIN\Desktop\Project\family-ticket-tracker\API\HO.FamilyTicketTracker\HO.FamilyTicketTracker.API\obj\Debug\net8.0\HO.FamilyTicketTracker.API.genruntimeconfig.cache
 C:\Users\ADMIN\Desktop\Project\family-ticket-tracker\API\HO.FamilyTicketTracker\HO.FamilyTicketTracker.API\obj\Debug\net8.0\ref\HO.FamilyTicketTracker.API.dll
+C:\Users\ADMIN\Desktop\Project\family-ticket-tracker\API\HO.FamilyTicketTracker\HO.FamilyTicketTracker.API\bin\Debug\net8.0\Microsoft.Extensions.Caching.StackExchangeRedis.dll
+C:\Users\ADMIN\Desktop\Project\family-ticket-tracker\API\HO.FamilyTicketTracker\HO.FamilyTicketTracker.API\bin\Debug\net8.0\Pipelines.Sockets.Unofficial.dll
+C:\Users\ADMIN\Desktop\Project\family-ticket-tracker\API\HO.FamilyTicketTracker\HO.FamilyTicketTracker.API\bin\Debug\net8.0\StackExchange.Redis.dll
+C:\Users\ADMIN\Desktop\Project\family-ticket-tracker\API\HO.FamilyTicketTracker\HO.FamilyTicketTracker.API\bin\Debug\net8.0\Microsoft.EntityFrameworkCore.InMemory.dll

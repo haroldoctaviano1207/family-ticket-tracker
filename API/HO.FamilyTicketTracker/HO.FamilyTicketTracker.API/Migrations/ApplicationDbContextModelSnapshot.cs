@@ -71,20 +71,26 @@ namespace HO.FamilyTicketTracker.API.Migrations
                         .HasColumnType("text");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValue(new DateTime(2025, 7, 29, 12, 40, 59, 435, DateTimeKind.Utc).AddTicks(3580));
 
                     b.Property<string>("DisplayName")
                         .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("boolean");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true);
 
                     b.Property<int?>("SortOrder")
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValue(new DateTime(2025, 7, 29, 12, 40, 59, 435, DateTimeKind.Utc).AddTicks(3876));
 
                     b.HasKey("Id");
 
@@ -101,7 +107,7 @@ namespace HO.FamilyTicketTracker.API.Migrations
                             Code = "CHILD",
                             CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             DisplayName = "Child",
-                            IsActive = false,
+                            IsActive = true,
                             SortOrder = 1,
                             UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
@@ -112,7 +118,7 @@ namespace HO.FamilyTicketTracker.API.Migrations
                             Code = "PARENT",
                             CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             DisplayName = "Parent",
-                            IsActive = false,
+                            IsActive = true,
                             SortOrder = 2,
                             UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
@@ -123,7 +129,7 @@ namespace HO.FamilyTicketTracker.API.Migrations
                             Code = "LOW",
                             CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             DisplayName = "Low",
-                            IsActive = false,
+                            IsActive = true,
                             SortOrder = 1,
                             UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
@@ -134,7 +140,7 @@ namespace HO.FamilyTicketTracker.API.Migrations
                             Code = "MEDIUM",
                             CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             DisplayName = "Medium",
-                            IsActive = false,
+                            IsActive = true,
                             SortOrder = 2,
                             UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
@@ -145,7 +151,7 @@ namespace HO.FamilyTicketTracker.API.Migrations
                             Code = "HIGH",
                             CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             DisplayName = "HIGH",
-                            IsActive = false,
+                            IsActive = true,
                             SortOrder = 3,
                             UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
@@ -156,7 +162,7 @@ namespace HO.FamilyTicketTracker.API.Migrations
                             Code = "GENERAL",
                             CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             DisplayName = "General",
-                            IsActive = false,
+                            IsActive = true,
                             SortOrder = 1,
                             UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
@@ -167,7 +173,7 @@ namespace HO.FamilyTicketTracker.API.Migrations
                             Code = "CHORES",
                             CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             DisplayName = "Chores",
-                            IsActive = false,
+                            IsActive = true,
                             SortOrder = 2,
                             UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
@@ -178,7 +184,7 @@ namespace HO.FamilyTicketTracker.API.Migrations
                             Code = "MAINTENANCE",
                             CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             DisplayName = "Maintenance",
-                            IsActive = false,
+                            IsActive = true,
                             SortOrder = 3,
                             UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
@@ -189,7 +195,7 @@ namespace HO.FamilyTicketTracker.API.Migrations
                             Code = "HOMEWORK_HELP",
                             CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             DisplayName = "Homework Help",
-                            IsActive = false,
+                            IsActive = true,
                             SortOrder = 4,
                             UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
@@ -200,7 +206,7 @@ namespace HO.FamilyTicketTracker.API.Migrations
                             Code = "SHOPPING",
                             CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             DisplayName = "Shopping",
-                            IsActive = false,
+                            IsActive = true,
                             SortOrder = 5,
                             UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
@@ -211,7 +217,7 @@ namespace HO.FamilyTicketTracker.API.Migrations
                             Code = "CLEANING",
                             CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             DisplayName = "Cleaning",
-                            IsActive = false,
+                            IsActive = true,
                             SortOrder = 6,
                             UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
@@ -222,7 +228,7 @@ namespace HO.FamilyTicketTracker.API.Migrations
                             Code = "COOKING",
                             CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             DisplayName = "Cooking",
-                            IsActive = false,
+                            IsActive = true,
                             SortOrder = 7,
                             UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
@@ -233,7 +239,7 @@ namespace HO.FamilyTicketTracker.API.Migrations
                             Code = "YARD_WORK",
                             CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             DisplayName = "Yard Work",
-                            IsActive = false,
+                            IsActive = true,
                             SortOrder = 8,
                             UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
@@ -244,7 +250,7 @@ namespace HO.FamilyTicketTracker.API.Migrations
                             Code = "PET_CARE",
                             CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             DisplayName = "Pet Care",
-                            IsActive = false,
+                            IsActive = true,
                             SortOrder = 9,
                             UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
@@ -255,7 +261,7 @@ namespace HO.FamilyTicketTracker.API.Migrations
                             Code = "OTHER",
                             CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             DisplayName = "Other",
-                            IsActive = false,
+                            IsActive = true,
                             SortOrder = 10,
                             UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
@@ -266,7 +272,7 @@ namespace HO.FamilyTicketTracker.API.Migrations
                             Code = "OPEN",
                             CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             DisplayName = "Open",
-                            IsActive = false,
+                            IsActive = true,
                             SortOrder = 1,
                             UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
@@ -277,7 +283,7 @@ namespace HO.FamilyTicketTracker.API.Migrations
                             Code = "IN_PROGRESS",
                             CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             DisplayName = "In Progress",
-                            IsActive = false,
+                            IsActive = true,
                             SortOrder = 2,
                             UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
@@ -288,7 +294,7 @@ namespace HO.FamilyTicketTracker.API.Migrations
                             Code = "PENDING_REVIEW",
                             CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             DisplayName = "Pending Review",
-                            IsActive = false,
+                            IsActive = true,
                             SortOrder = 3,
                             UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
@@ -299,7 +305,7 @@ namespace HO.FamilyTicketTracker.API.Migrations
                             Code = "COMPLETED",
                             CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             DisplayName = "Completed",
-                            IsActive = false,
+                            IsActive = true,
                             SortOrder = 4,
                             UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
@@ -310,7 +316,7 @@ namespace HO.FamilyTicketTracker.API.Migrations
                             Code = "CANCELLED",
                             CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             DisplayName = "Cancelled",
-                            IsActive = false,
+                            IsActive = true,
                             SortOrder = 5,
                             UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         });

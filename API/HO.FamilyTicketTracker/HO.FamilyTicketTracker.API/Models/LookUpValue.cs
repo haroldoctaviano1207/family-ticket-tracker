@@ -7,7 +7,7 @@ namespace HO.FamilyTicketTracker.API.Models
     public string Code { get; set; } = string.Empty;
     public string DisplayName { get; set; } = string.Empty;
     public int? SortOrder { get; set; }
-    public bool IsActive { get; set; }
+    public bool IsActive { get; set; } = true;
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
   }
